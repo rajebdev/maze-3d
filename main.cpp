@@ -406,8 +406,6 @@ void setView(){
 
 }
 
-
-
 void mainPlay()
 {
     srand(time(NULL));
