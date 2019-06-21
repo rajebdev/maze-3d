@@ -11,7 +11,7 @@
 
 using namespace std;
 
-int DEFAULT_SIZE = 8;
+int DEFAULT_SIZE = 9;
 
 int** MAP;
 int* ROAD;
@@ -29,6 +29,7 @@ float angleX=0, angleY=0, angleZ=0;
 int color_x = 0;
 int wallModel, playerModel;
 bool isTransparant = false;
+bool isNight = false;
 
 float pos[] = {2,10.5,1.5};
 float viewDir[] = {0,-1,0};
@@ -388,13 +389,14 @@ void startingMaze(int ms)
     noMenu = 1;
     make_title();
     pos[1] = maxOrtho + marginMaze + 2;
-    LENGTH % 2 == 0 ? pos[0] = (maxOrtho+marginMaze-0.5)/2: pos[0] = maxOrtho/2+marginMaze;
+    LENGTH % 2 == 0 ? pos[0] = (maxOrtho+marginMaze-0.5)/2: pos[0] = (maxOrtho+marginMaze-2)/2;
 }
 
 void setView(){
+    isNight == true ? glClearColor(0,0,0,1) : glClearColor(1,1,1,1) ;
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    if(viewMode == 2) {
+    if(viewMode == 2 && mode == 1) {
         gluPerspective(90.0,1,1,200);
         gluLookAt(pos[0],pos[1],pos[2]+0.5,pos[0]+viewDir[0],pos[1]+viewDir[1],pos[2]+viewDir[2],0,0,1);
     }
@@ -435,6 +437,7 @@ void mainPlay()
 void mainMenu()
 {
     mode = 0;
+    setView();
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glPushMatrix();
@@ -458,6 +461,7 @@ void mainMenu()
 
 void mainHelp(void){
     mode = 2;
+    setView();
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     float top_text = 9/4-2.5/2;
     float jarak_text = 9/5;
@@ -484,6 +488,7 @@ void mainHelp(void){
 
 void mainCredits(void){
     mode = 3;
+    setView();
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     float top_text = 9/4-2.5/2;
     float jarak_text = 9/4;
@@ -499,6 +504,7 @@ void mainCredits(void){
 
 void mainAbout(void){
     mode = 4;
+    setView();
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     float top_text = 9/2-2.5/2;
     float jarak_text = 9/4;
@@ -513,6 +519,7 @@ void mainAbout(void){
 
 void mainWin(void){
     mode = 5;
+    setView();
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     int level = save_game - 8;
     float top_text = 9/2-2.5/2;
@@ -533,17 +540,32 @@ void keyboard(unsigned char key, int x, int y)
 {
     if (mode == 1)
     {
-        if((key=='d' || key=='D') && x_player < max_index && MAP[x_player+1][y_player] != 1){
-            x_player += 1;
-        }
-        if((key=='a' || key=='A') && x_player > 0 && MAP[x_player-1][y_player] != 1){
-            x_player -= 1;
-        }
-        if((key=='w' || key=='W') && y_player > 0 && MAP[x_player][y_player-1] != 1){
-            y_player -= 1;
-        }
-        if((key=='s' || key=='S') && y_player < max_index && MAP[x_player][y_player+1] != 1){
-            y_player += 1;
+        if (viewMode){
+            if((key=='a' || key=='A') && x_player < max_index && MAP[x_player+1][y_player] != 1){
+                x_player += 1;
+            }
+            if((key=='d' || key=='D') && x_player > 0 && MAP[x_player-1][y_player] != 1){
+                x_player -= 1;
+            }
+            if((key=='s' || key=='S') && y_player > 0 && MAP[x_player][y_player-1] != 1){
+                y_player -= 1;
+            }
+            if((key=='w' || key=='W') && y_player < max_index && MAP[x_player][y_player+1] != 1){
+                y_player += 1;
+            }
+        }else {
+            if((key=='d' || key=='D') && x_player < max_index && MAP[x_player+1][y_player] != 1){
+                x_player += 1;
+            }
+            if((key=='a' || key=='A') && x_player > 0 && MAP[x_player-1][y_player] != 1){
+                x_player -= 1;
+            }
+            if((key=='w' || key=='W') && y_player > 0 && MAP[x_player][y_player-1] != 1){
+                y_player -= 1;
+            }
+            if((key=='s' || key=='S') && y_player < max_index && MAP[x_player][y_player+1] != 1){
+                y_player += 1;
+            }
         }
         if((key=='r' || key=='R')){
             generate_maze();
@@ -624,6 +646,14 @@ void keyboard(unsigned char key, int x, int y)
                 isTransparant = false;
             }else{
                 isTransparant = true;
+            }
+        }
+
+        if (key=='n' || key == 'N'){
+            if(isNight){
+                isNight = false;
+            }else{
+                isNight = true;
             }
         }
     }
@@ -727,7 +757,7 @@ void specKey(int key, int x, int y){
                     pos[2]-=1*viewDir[2];
             }
             mainPlay();
-            // cout << pos[0] << " " << pos[1] << " " << pos[2] << endl;
+            cout << pos[0] << " " << pos[1] << " " << pos[2] << endl;
     }
 }
 
