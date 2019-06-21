@@ -30,9 +30,9 @@ int color_x = 0;
 int wallModel, playerModel;
 bool isTransparant = false;
 
-float pos[] = {1,20,10};
-float ver[] = {0,-1,0};
-float alpha = 4.71;
+float pos[] = {2,10.5,1.5};
+float viewDir[] = {0,-1,0};
+float alpha = 5;
 
 float COLOR[7][3] = {
         {1, 0, 0},
@@ -223,22 +223,6 @@ void reloadOrtho()
     glMatrixMode(GL_MODELVIEW);
 }
 
-void startingMaze(int ms)
-{
-    LENGTH = ms;
-    max_index = LENGTH*2;
-    max_road = max_index-1;
-    mazeSize = LENGTH*2+1;
-    marginMaze = (double)2.5/(double)DEFAULT_SIZE*(double)LENGTH;
-    maxOrtho = mazeSize;
-    generate_maze();
-    wallModel = 1;
-    playerModel = 1;
-    noMenu = 1;
-    make_title();
-    pos[1] = LENGTH + marginMaze;
-    LENGTH % 2 == 0 ? pos[0] = 1 : pos[0] = 0;
-}
 
 void rotateMaze()
 {
@@ -332,7 +316,7 @@ void makePlayer(int posX, int posY)
     glPushMatrix();
         glColor3f(0,0,1);
         glTranslated(posX, -posY, 0);
-        glTranslated(0.5, maxOrtho, 0.5);
+        glTranslated(0.5, maxOrtho, 0.7);
         setMaterialColor(1,1,0, 1);
         if (playerModel == 1){
             glutSolidSphere(0.4,36,36);
@@ -389,12 +373,30 @@ void makeSelector(int no_menu)
     glPopMatrix();
 }
 
+
+void startingMaze(int ms)
+{
+    LENGTH = ms;
+    max_index = LENGTH*2;
+    max_road = max_index-1;
+    mazeSize = LENGTH*2+1;
+    marginMaze = (double)2.5/(double)DEFAULT_SIZE*(double)LENGTH;
+    maxOrtho = mazeSize;
+    generate_maze();
+    wallModel = 1;
+    playerModel = 1;
+    noMenu = 1;
+    make_title();
+    pos[1] = maxOrtho + marginMaze + 2;
+    LENGTH % 2 == 0 ? pos[0] = (maxOrtho+marginMaze-0.5)/2: pos[0] = maxOrtho/2+marginMaze;
+}
+
 void setView(){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     if(viewMode == 2) {
-        gluPerspective(45.0,1,1,50);
-        gluLookAt(pos[0],pos[1],pos[2],pos[0]+ver[0],pos[1]+ver[1],pos[2]+ver[2],0,0,1);
+        gluPerspective(90.0,1,1,200);
+        gluLookAt(pos[0],pos[1],pos[2]+0.5,pos[0]+viewDir[0],pos[1]+viewDir[1],pos[2]+viewDir[2],0,0,1);
     }
     else{
         glOrtho(-marginMaze, maxOrtho+marginMaze, -marginMaze, maxOrtho+marginMaze, -100.0, 100.0);
@@ -415,10 +417,10 @@ void mainPlay()
     glRotated(angle3D,1,0,0);
     rotateMaze();
     glPushMatrix();
-        glTranslated(LENGTH+0.5, LENGTH+1, 0.1);
+        glTranslated(LENGTH+0.5, LENGTH+1, 0);
         setMaterialColor(0,1,0,0.4);
         glTranslated(0,0,0);
-        glScaled(maxOrtho,maxOrtho,0.2);
+        glScaled(maxOrtho,maxOrtho,0.3);
         glutSolidCube(1);
     glPopMatrix();
     for (i=0; i < mazeSize; i++){
@@ -560,7 +562,6 @@ void keyboard(unsigned char key, int x, int y)
             }else if(viewMode == 2) {
                 angle3D=0;
             }
-            cout << viewMode <<  endl;
         }
         if (viewMode == 1 || viewMode == 2){
             if(key=='x'){
@@ -583,14 +584,16 @@ void keyboard(unsigned char key, int x, int y)
             }
         }
         if((key=='q' || key=='Q')){
-            if (LENGTH>5){
+            if (LENGTH>8){
                 LENGTH-=1;
+                save_game = LENGTH;
                 startingMaze(LENGTH);
                 reloadOrtho();
             }
         }
         if((key=='e' || key=='E')){
             LENGTH+=1;
+            save_game = LENGTH;
             startingMaze(LENGTH);
             reloadOrtho();
         }
@@ -707,26 +710,27 @@ void keyboard(unsigned char key, int x, int y)
 }
 
 void specKey(int key, int x, int y){
-        if (viewMode == 2) {
-                if(key == GLUT_KEY_RIGHT ) {
-                        alpha-=0.1;
-                        ver[0] = cos(alpha);
-                        ver[1] = sin(alpha);
-                }else if(key == GLUT_KEY_LEFT) {
-                        alpha+=0.1;
-                        ver[0] = cos(alpha);
-                        ver[1] = sin(alpha);
-                }else if(key == GLUT_KEY_UP) {
-                        pos[0]+=0.05*ver[0];
-                        pos[1]+=0.05*ver[1];
-                        pos[2]+=0.05*ver[2];
-                }else if(key == GLUT_KEY_DOWN) {
-                        pos[0]-=0.05*ver[0];
-                        pos[1]-=0.05*ver[1];
-                        pos[2]-=0.05*ver[2];
-                }
-                mainPlay();
-        }
+    if (viewMode == 2) {
+            if(key == GLUT_KEY_RIGHT ) {
+                    alpha-=0.1;
+                    viewDir[0] = cos(alpha);
+                    viewDir[1] = sin(alpha);
+            }else if(key == GLUT_KEY_LEFT) {
+                    alpha+=0.1;
+                    viewDir[0] = cos(alpha);
+                    viewDir[1] = sin(alpha);
+            }else if(key == GLUT_KEY_UP) {
+                    pos[0]+=1*viewDir[0];
+                    pos[1]+=1*viewDir[1];
+                    pos[2]+=1*viewDir[2];
+            }else if(key == GLUT_KEY_DOWN) {
+                    pos[0]-=1*viewDir[0];
+                    pos[1]-=1*viewDir[1];
+                    pos[2]-=1*viewDir[2];
+            }
+            mainPlay();
+            // cout << pos[0] << " " << pos[1] << " " << pos[2] << endl;
+    }
 }
 
 void reshape(int w, int h)
@@ -740,6 +744,7 @@ void reshape(int w, int h)
         glOrtho (-marginMaze*(GLfloat)h/(GLfloat)w, (maxOrtho+marginMaze)*(GLfloat)w/(GLfloat)h, -marginMaze, maxOrtho+marginMaze, -100.0, 100.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    setView();
  }
 
 
