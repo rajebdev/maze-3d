@@ -1,11 +1,12 @@
 # depslib dependency file v1.0
-1560523555 source:d:\kuliah\semester_4\grafikakomputer\tugas_besar_4_maze_3d_lighting\main.cpp
+1561113786 source:d:\kuliah\semester_4\grafikakomputer\tugas_besar_4_maze_3d_lighting\main.cpp
 	<windows.h>
 	<GLUT/glut.h>
 	<GL/glut.h>
 	<iostream>
 	<time.h>
 	<sstream>
+	<math.h>
 
 1301111162 c:\program files (x86)\codeblocks\mingw\include\windows.h
 	<winresrc.h>

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <time.h>
 #include <sstream>
+#include <math.h>
 
 using namespace std;
 
@@ -21,12 +22,17 @@ int rand_x, rand_y, cell;
 int right_road, left_road, top_road, bottom_road, road_now;
 int x_player, y_player, mazeSize, LENGTH, door_pos, max_index, max_road, road;
 
-bool model3D=false;
+int viewMode=0;
 float angle3D=0;
 float angleX=0, angleY=0, angleZ=0;
 
 int color_x = 0;
 int wallModel, playerModel;
+bool isTransparant = false;
+
+float pos[] = {1,20,10};
+float ver[] = {0,-1,0};
+float alpha = 4.71;
 
 float COLOR[7][3] = {
         {1, 0, 0},
@@ -71,11 +77,11 @@ void make_title(){
     }
 }
 
-void setMaterialColor(float r, float g, float b)
+void setMaterialColor(float r, float g, float b, float a)
 {
-    GLfloat mat_specular[] = { r, g, b, 0.03 };
-    GLfloat mat_shininess[] = { 10.0f };
-    GLfloat mat_diffuse[] = { r, g, b, 0.03 };
+    GLfloat mat_specular[] = { r, g, b, a };
+    GLfloat mat_shininess[] = { 10.0 };
+    GLfloat mat_diffuse[] = { r, g, b, a };
 
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
     glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
@@ -84,17 +90,16 @@ void setMaterialColor(float r, float g, float b)
 
 void setLigthingColor(float r, float g, float b)
 {
-    GLfloat light_position_diff[] = { 0, LENGTH, 50, 0.0 };
-    GLfloat diffuse_light[] = { r, g, b, 0.0 };
-    GLfloat light_position_spec[] = { 0, LENGTH, 50, 0.0 };
-    GLfloat specular_light[] = { r, g, b, 0.0 };
-    GLfloat ambient_light[] = { 0.5, 0.5, 0.5, 1.0 };
-
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position_diff);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_light);
-    glLightfv(GL_LIGHT1, GL_POSITION, light_position_spec);
-    glLightfv(GL_LIGHT1, GL_SPECULAR, specular_light);
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ambient_light);
+        GLfloat light_position_diff[] = { 10.0, 10.0, 5.0, 0.0};
+        GLfloat light_position_spec[] = { 10.0, -10.0, 5.0, 0.0 };
+        GLfloat diffuse_light[] = { 0.8, 0.8, 1.0, 0.5 };
+        GLfloat specular_light[] = { 1.0, 1.0, 1.0, 1.0 };
+        GLfloat ambient_light[] = { 0.9, 0.9, 0.9, 1.0 };
+        glLightfv(GL_LIGHT0, GL_POSITION, light_position_diff);
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_light);
+        glLightfv(GL_LIGHT1, GL_POSITION, light_position_spec);
+        glLightfv(GL_LIGHT1, GL_SPECULAR, specular_light);
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ambient_light);
 }
 
 void create_array()
@@ -231,6 +236,8 @@ void startingMaze(int ms)
     playerModel = 1;
     noMenu = 1;
     make_title();
+    pos[1] = LENGTH + marginMaze;
+    LENGTH % 2 == 0 ? pos[0] = 1 : pos[0] = 0;
 }
 
 void rotateMaze()
@@ -244,47 +251,59 @@ void rotateMaze()
 
 void wallModelOne()
 {
-    glTranslated(0,0,0.6);
-    //depan
-    setMaterialColor(1,0,0);
     glPushMatrix();
-        glTranslated(0,0,0.5);
-        glScaled(1,1,0.1);
-        glutSolidCube(1);
-    glPopMatrix();
-    //belakang
-    glPushMatrix();
-        glTranslated(0,0,-0.5);
-        glScaled(1,1,0.1);
-        glutSolidCube(1);
-    glPopMatrix();
-
-    setMaterialColor(1,1,0);
-    //kiri
-    glPushMatrix();
-        glTranslated(-0.5,0,0);
-        glScaled(0.1,1,1);
-        glutSolidCube(1);
-    glPopMatrix();
-    //kanan
-    glPushMatrix();
-        glTranslated(0.5,0,0);
-        glScaled(0.1,1,1);
-        glutSolidCube(1);
-    glPopMatrix();
-
-    setMaterialColor(0,1,0);
-    //atas
-    glPushMatrix();
-        glTranslated(0,0.5,0);
-        glScaled(1,0.1,1);
-        glutSolidCube(1);
-    glPopMatrix();
-    //bawah
-    glPushMatrix();
-        glTranslated(0,-0.5,0);
-        glScaled(1,0.1,1);
-        glutSolidCube(1);
+    glTranslated(-0.5,-0.5,0);
+    glColor4f(1,0,0,1);
+    glBegin(GL_POLYGON);
+    //back
+    glNormal3f(0,0,-1);
+        glVertex3d(0,0,0);
+        glVertex3d(0,1,0);
+        glVertex3d(1,1,0);
+        glVertex3d(1,0,0);
+    glEnd();
+    //front
+    glBegin(GL_POLYGON);
+    glNormal3f(0,0,1);
+        glVertex3d(0,0,1);
+        glVertex3d(0,1,1);
+        glVertex3d(1,1,1);
+        glVertex3d(1,0,1);
+    glEnd();
+    //left
+    glColor4f(1,1,0,1);
+    glBegin(GL_POLYGON);
+        glNormal3f(-1,0,0);
+        glVertex3d(0,0,0);
+        glVertex3d(0,1,0);
+        glVertex3d(0,1,1);
+        glVertex3d(0,0,1);
+    glEnd();
+    //right
+    glBegin(GL_POLYGON);
+        glNormal3f(1,0,0);
+        glVertex3d(1,0,0);
+        glVertex3d(1,1,0);
+        glVertex3d(1,1,1);
+        glVertex3d(1,0,1);
+    glEnd();
+    //bottom
+    glColor4f(0,1,0,1);
+    glBegin(GL_POLYGON);
+    glNormal3f(0,-1,0);
+        glVertex3d(0,0,0);
+        glVertex3d(0,0,1);
+        glVertex3d(1,0,1);
+        glVertex3d(1,0,0);
+    glEnd();
+    //top
+    glBegin(GL_POLYGON);
+    glNormal3f(0,1,0);
+        glVertex3d(0,1,0);
+        glVertex3d(0,1,1);
+        glVertex3d(1,1,1);
+        glVertex3d(1,1,0);
+    glEnd();
     glPopMatrix();
 }
 
@@ -293,7 +312,7 @@ void makeWall(int posX, int posY)
     glPushMatrix();
         glTranslated(posX, -posY, 0);
         glTranslated(0.5, maxOrtho, 0.1);
-        setMaterialColor(COLOR[color_x][0], COLOR[color_x][1], COLOR[color_x][2]);
+        isTransparant == true ? setMaterialColor(COLOR[color_x][0], COLOR[color_x][1], COLOR[color_x][2],0.5) : setMaterialColor(COLOR[color_x][0], COLOR[color_x][1], COLOR[color_x][2],1);
         if (wallModel == 1){
             glTranslated(0,0,0.6);
             glutSolidCube(1);
@@ -314,7 +333,7 @@ void makePlayer(int posX, int posY)
         glColor3f(0,0,1);
         glTranslated(posX, -posY, 0);
         glTranslated(0.5, maxOrtho, 0.5);
-        setMaterialColor(1,1,0);
+        setMaterialColor(1,1,0, 1);
         if (playerModel == 1){
             glutSolidSphere(0.4,36,36);
         }
@@ -327,7 +346,7 @@ void makePlayer(int posX, int posY)
 
 
 void displayText(char align, float y, char *text, int size_huruf) {
-    setMaterialColor(1,1,1);
+    setMaterialColor(1,1,1, 1);
     char *c;
     void* font_x;
     float width_text, x;
@@ -364,24 +383,42 @@ void makeSelector(int no_menu)
     glPushMatrix();
         glTranslated(17/2, 17/2, 70);
         glTranslated(-3.5, 4-2*no_menu, 0);
-        setMaterialColor(0,0,0);
+        setMaterialColor(0,0,0,1);
         glRotated(30,0,0,1);
         glutSolidCone(0.75,1,3,3);
     glPopMatrix();
 }
 
+void setView(){
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    if(viewMode == 2) {
+        gluPerspective(45.0,1,1,50);
+        gluLookAt(pos[0],pos[1],pos[2],pos[0]+ver[0],pos[1]+ver[1],pos[2]+ver[2],0,0,1);
+    }
+    else{
+        glOrtho(-marginMaze, maxOrtho+marginMaze, -marginMaze, maxOrtho+marginMaze, -100.0, 100.0);
+    }
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+}
+
+
+
 void mainPlay()
 {
+    srand(time(NULL));
     mode = 1;
+    setView();
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
     glRotated(angle3D,1,0,0);
     rotateMaze();
     glPushMatrix();
         glTranslated(LENGTH+0.5, LENGTH+1, 0.1);
-        setMaterialColor(0,0.2,1);
+        setMaterialColor(0,1,0,0.4);
         glTranslated(0,0,0);
-        glScaled(maxOrtho,maxOrtho,0.1);
+        glScaled(maxOrtho,maxOrtho,0.2);
         glutSolidCube(1);
     glPopMatrix();
     for (i=0; i < mazeSize; i++){
@@ -400,6 +437,13 @@ void mainMenu()
     mode = 0;
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
+    glPushMatrix();
+        glTranslated(LENGTH+0.5, LENGTH+1, 0.1);
+        setMaterialColor(0, 0.2, 0, 0.6);
+        glTranslated(0,0,0);
+        glScaled(maxOrtho+marginMaze,maxOrtho+marginMaze,0.1);
+        glutSolidCube(1);
+    glPopMatrix();
     float top_text = 9/2-1.8/2;
     float jarak_text = 9/4;
     displayText('c', 17-top_text, "Menu", 18);
@@ -505,15 +549,20 @@ void keyboard(unsigned char key, int x, int y)
             generate_maze();
         }
         if((key=='v' || key=='V')){
-            if (model3D){
-                angle3D=0; angleX=0; angleY=0; angleZ=0;
-                model3D=false;
-            }else{
-                angle3D=-15;
-                model3D=true;
+            viewMode += 1;
+            if (viewMode > 2){
+                viewMode = 0;
             }
+            if (viewMode == 0){
+                angle3D=0; angleX=0; angleY=0; angleZ=0;
+            }else if(viewMode == 1) {
+                angle3D=-15;
+            }else if(viewMode == 2) {
+                angle3D=0;
+            }
+            cout << viewMode <<  endl;
         }
-        if (model3D){
+        if (viewMode == 1 || viewMode == 2){
             if(key=='x'){
                 angleX+=1;
             }
@@ -568,6 +617,14 @@ void keyboard(unsigned char key, int x, int y)
             save_game = LENGTH;
             mode = 5;
         }
+
+        if (key=='b' || key == 'B'){
+            if(isTransparant){
+                isTransparant = false;
+            }else{
+                isTransparant = true;
+            }
+        }
     }
     else if (mode == 0)
     {
@@ -620,6 +677,7 @@ void keyboard(unsigned char key, int x, int y)
 
     }
 
+
     if (mode == 0)
     {
         mainMenu();
@@ -648,6 +706,29 @@ void keyboard(unsigned char key, int x, int y)
 
 }
 
+void specKey(int key, int x, int y){
+        if (viewMode == 2) {
+                if(key == GLUT_KEY_RIGHT ) {
+                        alpha-=0.1;
+                        ver[0] = cos(alpha);
+                        ver[1] = sin(alpha);
+                }else if(key == GLUT_KEY_LEFT) {
+                        alpha+=0.1;
+                        ver[0] = cos(alpha);
+                        ver[1] = sin(alpha);
+                }else if(key == GLUT_KEY_UP) {
+                        pos[0]+=0.05*ver[0];
+                        pos[1]+=0.05*ver[1];
+                        pos[2]+=0.05*ver[2];
+                }else if(key == GLUT_KEY_DOWN) {
+                        pos[0]-=0.05*ver[0];
+                        pos[1]-=0.05*ver[1];
+                        pos[2]-=0.05*ver[2];
+                }
+                mainPlay();
+        }
+}
+
 void reshape(int w, int h)
 {
     glViewport (0, 0, (GLsizei) w, (GLsizei) h);
@@ -661,18 +742,22 @@ void reshape(int w, int h)
     glLoadIdentity();
  }
 
+
+
 void myinit()
 {
-    glClearColor (0., 0.5, 0, 0.0);
+    glClearColor(1,1,1,1);
     setLigthingColor(1, 1, 1);
     glEnable(GL_LIGHTING);
-    glEnable(GL_DEPTH_TEST);
     glShadeModel (GL_SMOOTH);
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHT1);
-    
+
+    //3Ddependeci
+    glShadeModel(GL_FLAT);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_DEPTH_TEST);
     save_game = DEFAULT_SIZE;
 }
 
@@ -688,6 +773,7 @@ int main(int argc, char* argv[])
 	glutDisplayFunc(mainMenu);
 	glutKeyboardFunc(keyboard);
 	glutReshapeFunc(reshape);
+    glutSpecialFunc(specKey);
 	myinit();
 	glutMainLoop();
 	return 0;
