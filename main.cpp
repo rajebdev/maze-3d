@@ -34,6 +34,7 @@ bool isNight = false;
 float pos[] = {2,10.5,1.5};
 float viewDir[] = {0,-1,0};
 float alpha = 5;
+float xMove = 0, zMove = 0;
 
 float COLOR[7][3] = {
         {1, 0, 0},
@@ -414,6 +415,7 @@ void mainPlay()
     mode = 1;
     setView();
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
+    glTranslated(xMove, 0, zMove);
     glRotated(angle3D,1,0,0);
     rotateMaze();
     glPushMatrix();
@@ -708,6 +710,28 @@ void keyboard(unsigned char key, int x, int y)
 
     }
 
+    if (viewMode == 2 && mode == 1)
+    {
+        if (key == 'j')
+        {
+            xMove -= 1;
+        }
+        if (key == 'l')
+        {
+            xMove += 1;
+        }
+        if (key == 'k')
+        {
+            zMove -= 1;
+        }
+        if (key == 'i')
+        {
+            zMove += 1;
+        }
+        mode = 1;
+    }
+    
+
 
     if (mode == 0)
     {
@@ -757,7 +781,7 @@ void specKey(int key, int x, int y){
                     pos[2]-=1*viewDir[2];
             }
             mainPlay();
-            cout << pos[0] << " " << pos[1] << " " << pos[2] << endl;
+            // cout << pos[0] << " " << pos[1] << " " << pos[2] << endl;
     }
 }
 
