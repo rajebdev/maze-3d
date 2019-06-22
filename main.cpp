@@ -8,6 +8,7 @@
 #include <time.h>
 #include <sstream>
 #include <math.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -332,11 +333,10 @@ void makePlayer(int posX, int posY)
 
 
 void displayText(char align, float y, char *text, int size_huruf) {
-    setMaterialColor(1,1,1, 1);
+    setMaterialColor(0,0,0, 1);
     char *c;
     void* font_x;
     float width_text, x;
-
 
     if (size_huruf == 10){
         font_x = GLUT_BITMAP_HELVETICA_10;
@@ -473,11 +473,11 @@ void mainHelp(void){
     displayText('l', 17-(top_text+jarak_text*4), "S = untuk bergerak ke bawah", 18);
     displayText('l', 17-(top_text+jarak_text*5), "A = untuk bergerak ke kiri", 18);
     displayText('l', 17-(top_text+jarak_text*6), "D = untuk bergerak ke kanan", 18);
-    displayText('l', 17-(top_text+jarak_text*7), "Q = untuk naik level", 18);
-    displayText('l', 17-(top_text+jarak_text*8), "E = untuk turun level", 18);
+    displayText('l', 17-(top_text+jarak_text*7), "Q = untuk turun level", 18);
+    displayText('l', 17-(top_text+jarak_text*8), "E = untuk naik level", 18);
     displayText('l', 17-(top_text+jarak_text*9), "R = untuk merubah pola", 18);
     displayText('l', 17-(top_text+jarak_text*10), "C = untuk merubah warna", 18);
-    displayText('l', 17-(top_text+jarak_text*11), "Mouse Klik Kanan = untuk merubah pola", 18);
+    // displayText('l', 17-(top_text+jarak_text*11), "Mouse Klik Kanan = untuk merubah pola", 18);
     displayText('l', 17-(top_text+jarak_text*12), "T = untuk merubah Texture", 18);
 
     displayText('l', 17-(top_text+jarak_text*14), "Special Key :", 18);
@@ -818,6 +818,39 @@ void myinit()
     save_game = DEFAULT_SIZE;
 }
 
+void printHelp()
+{
+    printf("Press :\n");
+    printf("W = untuk bergerak ke atas\n");
+    printf("S = untuk bergerak ke bawah\n");
+    printf("A = untuk bergerak ke kiri\n");
+    printf("D = untuk bergerak ke kanan\n");
+    printf("Q = untuk turun level\n");
+    printf("E = untuk naik level\n");
+    printf("R = untuk merubah pola\n");
+    printf("C = untuk merubah warna\n");
+    printf("T = untuk merubah Texture\n");
+    printf("P = untuk merubah tipe player\n");
+    printf("V = untuk merubah view mode\n");
+    printf("B = untuk merubah transparancy\n");
+    printf("N = untuk merubah kondisi pagi/malam\n");
+    printf("J = untuk menggeser maze ke kiri\n");
+    printf("L = untuk menggeser maze ke kanan\n");
+    printf("K = untuk menggeser maze ke bawah\n");
+    printf("I = untuk menggeser maze ke atas\n");
+    printf("x       = untuk Memutar sumbu x anticlockwise\n");
+    printf("shift+x = untuk Memutar sumbu x clockwise\n");
+    printf("y       = untuk Memutar sumbu y anticlockwise\n");
+    printf("shift+y = untuk Memutar sumbu y clockwise\n");
+    printf("z       = untuk Memutar sumbu z anticlockwise\n");
+    printf("shift+z = untuk Memutar sumbu z clockwise\n");
+    printf("Arrow UP    = untuk melakukan zoom in camera\n");
+    printf("Arrow Down  = untuk melakukan zoom out camera\n");
+    printf("Arrow LEFT  = untuk melakukan rotasi camera ke kiri\n");
+    printf("Arrow RIGHT = untuk melakukan rotasi camera ke kanan\n");
+}
+
+
 int main(int argc, char* argv[])
 {
     srand(time(NULL));
@@ -831,6 +864,7 @@ int main(int argc, char* argv[])
 	glutKeyboardFunc(keyboard);
 	glutReshapeFunc(reshape);
     glutSpecialFunc(specKey);
+    printHelp();
 	myinit();
 	glutMainLoop();
 	return 0;
